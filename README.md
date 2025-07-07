@@ -1,20 +1,20 @@
-# CVision 🎯
+# CVision 
 
 **CVision** is a modern resume matcher that helps job seekers instantly compare their resumes against real job descriptions. It's built with Next.js, styled with Tailwind CSS, and includes features like smart job cards, resume previews, and instant keyword matching.
 
 ---
 
-## 🌟 Features
+## Features
 
-- 🔍 **Live job search** by keyword (e.g., "frontend", "AI", "marketing")
-- 📄 **Readable job cards** with key metadata (title, company, location)
-- ✅ **One-click resume comparison** with job descriptions
-- 🧠 **Smart preview** to visualize how your resume aligns
-- 👤 **User login** with persistent session
+- **Live job search** by keyword (e.g., "frontend", "AI", "marketing")
+- **Readable job cards** with key metadata (title, company, location)
+- **One-click resume comparison** with job descriptions
+- **Smart preview** to visualize how your resume aligns
+- **User login** with persistent session
 
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 - [Next.js](https://nextjs.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
