@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import { useAuth } from '../../components/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -13,27 +13,22 @@ const Login = () => {
   const { setIsAuthenticated } = useAuth();
   const router = useRouter();
 
-  async function handleLoginSubmit(ev) {
-    ev.preventDefault();
-    try {
-      const response = await axios.post('/api/login', { username, password }); // Use local API route
-      const { token, user } = response.data; // Expect token and user from API
+async function handleLoginSubmit(ev) {
+  ev.preventDefault();
+  try {
+    const response = await axios.post('/api/login', { username, password });
 
-      // Store token and user data
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('isAuthenticated', 'true');
+    const { user } = response.data;
 
-      // Update auth context
-      setIsAuthenticated(true);
+    setIsAuthenticated(true);
 
-      alert('Login Successful');
-      setRedirect(true);
-    } catch (e) {
-      console.error('❌ Login Failed:', e);
-      alert('Login Failed');
-    }
+    router.push('/');
+  } catch (e) {
+    console.error('❌ Login Failed:', e);
+    alert('Login Failed');
   }
+}
+
 
   useEffect(() => {
     if (redirect) {

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useContext } from 'react';
 import ResumePreview from './ResumePreview';
-import { AppContext } from '../app/page';
+import { AppContext } from '../context/AppContext';
+
 
 export default function JobList() {
   const { resumeData, showPreview, setShowPreview } = useContext(AppContext);

@@ -3,7 +3,7 @@
 import { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import AnimatedLoader from './AnimatedLoader';
-import { AppContext } from '../app/page';
+import { AppContext } from '../context/AppContext';
 
 const defaultJobDescription = `Looking for a skilled software engineer with experience in React, Node.js, MongoDB, and REST APIs. Strong problem-solving and communication skills required. Bachelor's degree in Computer Science, Engineering, or related field preferred.`;
 

@@ -1,34 +1,42 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { AppProvider } from '../context/AppContext';
 import JobList from '../components/JobList';
 import Body from '../components/Body';
 import UserProfile from '../components/UserProfile';
-import { createContext, useState } from 'react';
-
-export const AppContext = createContext();
 
 export default function Home() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const [checked, setChecked] = useState(false);
 
-  const [resumeData, setResumeData] = useState(null);
-  const [atsCompleted, setAtsCompleted] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  console.log('🏠 Render: isAuthenticated =', isAuthenticated, '| checked =', checked);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      console.log('❌ Not authenticated, redirecting...');
-      router.push('/login');
+      console.log('🔐 Not authenticated, redirecting to /login');
+      router.replace('/login'); // <-- use replace instead of push
+      return;
     }
+    console.log('✅ Authenticated, setting checked = true');
+    setChecked(true);
   }, [isAuthenticated]);
 
-  if (!isAuthenticated) return null; // Block rendering until ready
+  if (!isAuthenticated || !checked) {
+    console.log('⏳ Returning fallback screen');
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        Redirecting...
+      </div>
+    );
+  }
 
+  console.log('🚀 Rendering main UI');
   return (
-    <AppContext.Provider value={{ resumeData, setResumeData, atsCompleted, setAtsCompleted, showPreview, setShowPreview }}>
+    <AppProvider>
       <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] text-white font-sans min-h-screen">
         <UserProfile />
         <div className="flex w-full h-[calc(100vh-56px)]">
@@ -42,6 +50,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </AppContext.Provider>
+    </AppProvider>
   );
 }

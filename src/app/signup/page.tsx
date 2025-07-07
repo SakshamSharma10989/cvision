@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter} from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import { useAuth } from '../../components/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' });

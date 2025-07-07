@@ -7,16 +7,33 @@ import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 const UserProfile = () => {
   const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user?.username) {
-      setUsername(user.username);
-    } else {
-      router.push('/login');
-    }
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          setUsername(data.user.username);
+        } else {
+          router.push('/login');
+        }
+      } catch (err) {
+        console.error('🔴 Failed to fetch user:', err);
+        router.push('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, [router]);
+
+  if (loading) {
+    return null; // Or loading UI
+  }
 
   return (
     <div className="w-full flex items-center justify-between px-6 py-3 bg-gradient-to-br from-gray-900 via-gray-850 to-blue-950 border-b border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">

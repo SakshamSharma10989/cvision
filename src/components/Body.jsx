@@ -4,8 +4,9 @@ import { useEffect, useRef, useCallback, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ResumeUpload from './ResumeUpload';
-import { useAuth } from '../components/AuthContext';
-import { AppContext } from '../app/page';
+import { useAuth } from '../context/AuthContext';
+import { AppContext } from '../context/AppContext';
+
 
 const Body = () => {
   const { resumeData, setResumeData, atsCompleted, setAtsCompleted, showPreview, setShowPreview } = useContext(AppContext);
@@ -77,12 +78,27 @@ const Body = () => {
     setIsUploading(false);
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
+const handleLogout = async () => {
+  try {
+    // Call backend to clear the cookie
+    await fetch('/api/logout', { method: 'POST' });
+
+    // Clean up localStorage
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     localStorage.removeItem('isAuthenticated');
-    router.push('/');
-  };
+
+    // Update auth state
+    setIsAuthenticated(false);
+
+    // Redirect to login
+    router.push('/login');
+  } catch (err) {
+    console.error('❌ Logout failed:', err);
+    alert('Logout failed. Please try again.');
+  }
+};
+
 
   const handleShowPreview = () => {
     if (resumeData && !atsCompleted) {
