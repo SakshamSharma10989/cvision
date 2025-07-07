@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [redirect, setRedirect] = useState(false);
   const { setIsAuthenticated } = useAuth();
   const router = useRouter();
 
