@@ -41,8 +41,9 @@ export async function POST(req) {
       httpOnly: true, // Prevents client-side JavaScript access
       secure: process.env.NODE_ENV === 'production', // Only secure in production
       path: '/', // Accessible across the app
-      sameSite: 'lax', // Protects against CSRF
-      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds (matches expiresIn)
+      sameSite: 'strict', 
+      secure:'true',
+      maxAge: 7 * 24 * 60 * 60, 
     });
 
     return response;
