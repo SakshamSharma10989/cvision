@@ -1,34 +1,21 @@
+// src/context/AuthContext.js
 'use client';
-
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checked, setChecked] = useState(false); // hydrate flag
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await axios.get('/api/auth/me'); // You must create this route!
-        if (res.status === 200) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (err) {
-        setIsAuthenticated(false);
-      } finally {
-        setChecked(true);
-      }
-    };
-
-    checkAuth();
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => setIsAuthenticated(res.ok))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setChecked(true));
   }, []);
 
-  if (!checked) return null;
+  if (!checked) return <div>Loading...</div>;
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
