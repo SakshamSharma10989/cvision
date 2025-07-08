@@ -1,102 +1,88 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import ATSChecker from './ATSChecker';
+import { AppContext } from '../context/AppContext';
 
-const ResumeUpload = ({ selectedFile, onUploadSuccess }) => {
-  const [resumeData, setResumeData] = useState(null);
+const ResumeUpload = ({ selectedFile }) => {
+  const { setResumeData } = useContext(AppContext); // ✅ use global setter
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [localPreview, setLocalPreview] = useState(null); // used for showing file link
 
   useEffect(() => {
-    if (!selectedFile || isUploading) return;
-
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
-
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setError('Please upload a PDF, DOC, or DOCX file.');
-      setResumeData(null);
-      onUploadSuccess?.(null);
-      return;
-    }
+    if (!selectedFile) return;
 
     const controller = new AbortController();
-    const { signal } = controller;
 
-    const uploadFile = async () => {
-      setIsUploading(true);
-      setLoading(true);
+    const uploadResume = async () => {
+      setUploading(true);
       setError(null);
 
-      const formData = new FormData();
-      formData.append('resume', selectedFile);
+      const validTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
+
+      if (!validTypes.includes(selectedFile.type)) {
+        setError('Unsupported file format. Please upload a PDF or Word document.');
+        setUploading(false);
+        return;
+      }
 
       try {
-        const response = await fetch('/api/resumes/upload', {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
 
+        const backendRes = await fetch('/api/resumes/upload', {
           method: 'POST',
           body: formData,
-          signal,
+          signal: controller.signal,
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+        const parsed = await backendRes.json();
+
+        if (!backendRes.ok) {
+          throw new Error(parsed.error || 'Failed to process resume');
         }
 
-        const data = await response.json();
+        const resumePayload = {
+          text: parsed.text,
+          fileName: parsed.fileName,
+          fileUrl: parsed.fileUrl,
+        };
 
-        if (!data.text || !data.text.trim()) {
-          throw new Error('Resume text extraction failed.');
+        setResumeData(resumePayload); // ✅ save to context
+        setLocalPreview(resumePayload); // only for link rendering
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Upload error:', err);
+          setError(err.message);
         }
-
-        setResumeData(data);
-        onUploadSuccess?.(data);
-      } catch (error) {
-        if (error.name === 'AbortError') return;
-        console.error('Upload error:', error);
-        setError(`Failed to upload resume: ${error.message}`);
-        setResumeData(null);
-        onUploadSuccess?.(null);
       } finally {
-        // Ensure minimum loading time
-        await new Promise((res) => setTimeout(res, 500));
-        setLoading(false);
-        setIsUploading(false);
+        setUploading(false);
       }
     };
 
-    uploadFile();
+    uploadResume();
 
     return () => controller.abort();
-  }, [selectedFile, onUploadSuccess]);
+  }, [selectedFile, setResumeData]);
 
   return (
-    <div className={`mt-8 w-full transition-all duration-300 ${resumeData ? 'max-w-6xl' : 'max-w-lg'}`}>
-      {loading && (
-        <div className="min-h-[300px] flex items-center justify-center">
-          <p className="text-blue-400 text-center">Uploading resume...</p>
-        </div>
+    <div className="mt-6 space-y-6">
+      {uploading && (
+        <p className="text-sm text-gray-400 animate-pulse">Uploading and parsing resume...</p>
       )}
 
       {error && (
-        <div className="min-h-[300px] flex items-center justify-center">
-          <p className="text-red-400 text-center">{error}</p>
-        </div>
+        <p className="text-red-500 text-sm font-medium">⚠️ {error}</p>
       )}
 
-      {resumeData && (
-  <div className="mt-8 w-full rounded-lg border border-slate-700 bg-slate-800/80 p-6 shadow-md overflow-auto max-h-[75vh] animate-fade-in">
-    <h2 className="text-xl font-semibold text-sky-400 mb-4 text-center">ATS Analysis</h2>
-    <ATSChecker resumeData={resumeData.text} />
-  </div>
-)}
+     
 
+      {localPreview?.text && <ATSChecker resumeData={localPreview.text} />}
     </div>
   );
 };

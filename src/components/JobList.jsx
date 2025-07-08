@@ -4,7 +4,6 @@ import { useEffect, useState, useContext } from 'react';
 import ResumePreview from './ResumePreview';
 import { AppContext } from '../context/AppContext';
 
-
 export default function JobList() {
   const { resumeData, showPreview, setShowPreview } = useContext(AppContext);
   const [jobs, setJobs] = useState([]);
@@ -41,12 +40,12 @@ export default function JobList() {
   const copyDescription = async (jobId, description) => {
     try {
       await navigator.clipboard.writeText(description);
-      setCopiedJobs(prev => ({
+      setCopiedJobs((prev) => ({
         ...prev,
         [jobId]: true,
       }));
       setTimeout(() => {
-        setCopiedJobs(prev => ({
+        setCopiedJobs((prev) => ({
           ...prev,
           [jobId]: false,
         }));
@@ -60,6 +59,7 @@ export default function JobList() {
     setShowPreview(false);
   };
 
+  // === RESUME PREVIEW ===
   if (showPreview && resumeData) {
     return (
       <div className="h-full flex flex-col bg-gradient-to-br from-gray-900 via-gray-850 to-blue-950">

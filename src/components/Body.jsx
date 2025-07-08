@@ -168,7 +168,8 @@ const handleLogout = async () => {
       )}
 
       <div className="mt-6 text-center">
-        {!atsCompleted && resumeData && (
+       {resumeData && !showPreview && !atsCompleted && (
+
           <button
             onClick={handleShowPreview}
             className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition-all duration-300 shadow-md"
