@@ -124,7 +124,8 @@ body {
   @apply text-lg leading-relaxed; 
 }
 @layer base {
-  html {
-    font-size: 22px; 
+  html, body {
+    font-size: 22px !important;
   }
 }
+
