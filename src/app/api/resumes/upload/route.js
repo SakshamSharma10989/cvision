@@ -7,8 +7,11 @@ import cloudinary from "cloudinary"
 import { connectDB } from "@/dbConfig/dbConfig"
 import Resume from "@/models/Resume"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import mongoose from "mongoose"   // ✅ FIX: added this import
+import { getToken } from "next-auth/jwt"
+import { authOptions } from "@/lib/auth"
+import mongoose from "mongoose"
+
+export const runtime = "nodejs" // ensure Node runtime
 
 cloudinary.v2.config({
   cloud_name: "dybqyd3vp",
@@ -23,15 +26,29 @@ const timeout = (ms) =>
 
 export async function POST(req) {
   try {
-    // ✅ Session from NextAuth
-    const session = await getServerSession(authOptions)
-    console.log("📌 Upload session check:", session)
+    // Log cookies for debugging
+    console.log("📌 Cookies received:", req.headers.get("cookie"))
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Attempt to get session
+    let session = await getServerSession(authOptions)
+
+    // Fallback: get JWT token directly if session is null
+    if (!session) {
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+      console.log("📌 JWT token received:", token)
+      if (token?.id) {
+        session = { user: { id: token.id } }
+      }
     }
 
-    // ✅ Extract file
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized: session missing" },
+        { status: 401 }
+      )
+    }
+
+    // Extract file from formData
     const formData = await req.formData()
     const file = formData.get("file")
     if (!file) {
@@ -45,7 +62,7 @@ export async function POST(req) {
     const tempPath = path.join(tmpdir(), `${Date.now()}-${fileName}`)
     await writeFile(tempPath, buffer)
 
-    // ✅ Upload to Cloudinary
+    // Upload to Cloudinary
     const cloudResult = await Promise.race([
       new Promise((resolve, reject) => {
         const uploadStream = cloudinary.v2.uploader.upload_stream(
@@ -60,7 +77,7 @@ export async function POST(req) {
       timeout(10000),
     ])
 
-    // ✅ Extract text
+    // Extract text from PDF
     let text = ""
     if (fileType === "application/pdf") {
       const pdfData = await parsePDF(buffer)
@@ -74,10 +91,10 @@ export async function POST(req) {
       throw new Error("No text could be extracted from the resume")
     }
 
-    // ✅ Save in MongoDB with ObjectId
+    // Save resume in MongoDB
     await connectDB()
     const savedResume = await Resume.create({
-      userId: new mongoose.Types.ObjectId(session.user.id), // ✅ FIX
+      userId: new mongoose.Types.ObjectId(session.user.id),
       filename: fileName,
       fileUrl: cloudResult.secure_url,
       text,
@@ -87,9 +104,10 @@ export async function POST(req) {
     return NextResponse.json(savedResume, { status: 200 })
   } catch (err) {
     console.error("❌ Resume processing error:", err)
+    const statusCode = err.message.includes("Unauthorized") ? 401 : 500
     return NextResponse.json(
-      { error: "Failed to process resume.", details: err.message },
-      { status: 500 }
+      { error: err.message || "Failed to process resume" },
+      { status: statusCode }
     )
   }
 }

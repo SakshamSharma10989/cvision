@@ -128,7 +128,7 @@ const Body = () => {
                   ? `Selected: ${selectedFile.name}`
                   : 'Click or Drag & Drop Your Resume Here'}
               </span>
-              <span className="text-sm text-slate-400">Supports PDF, DOC, DOCX</span>
+              <span className="text-sm text-slate-400">Please upload a PDF file</span>
             </div>
           </div>
         </>

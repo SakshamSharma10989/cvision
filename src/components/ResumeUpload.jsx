@@ -22,7 +22,7 @@ const ResumeUpload = ({ selectedFile }) => {
       const validTypes = ['application/pdf'];
 
       if (!validTypes.includes(selectedFile.type)) {
-        setError('Unsupported file format. Please upload a PDF or Word document.');
+        setError('Unsupported file format. Please upload a PDF.');
         setUploading(false);
         return;
       }
@@ -35,13 +35,20 @@ const ResumeUpload = ({ selectedFile }) => {
           method: 'POST',
           body: formData,
           signal: controller.signal,
-          credentials: 'include',
+          credentials: 'include',  // ✅ important for NextAuth cookie
         });
 
-        const parsed = await backendRes.json();
+        let parsed;
+        try {
+          parsed = await backendRes.json();
+        } catch (jsonErr) {
+          console.error('Failed to parse JSON response:', jsonErr);
+          throw new Error(`Server returned status ${backendRes.status}`);
+        }
 
         if (!backendRes.ok) {
-          throw new Error(parsed.error || 'Failed to process resume');
+          console.error('❌ Upload failed:', backendRes.status, parsed);
+          throw new Error(`${parsed.error || 'Failed to process resume'} (status ${backendRes.status})`);
         }
 
         const resumePayload = {
@@ -54,6 +61,7 @@ const ResumeUpload = ({ selectedFile }) => {
 
         setResumeData(resumePayload); 
         setLocalPreview(resumePayload); 
+
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error('Upload error:', err);
@@ -83,7 +91,6 @@ const ResumeUpload = ({ selectedFile }) => {
         </div>
       )}
 
-      {/* ✅ Render ATSChecker directly — no extra bg/border wrapper */}
       {localPreview?.text && (
         <ATSChecker resumeData={localPreview} />
       )}

@@ -1,8 +1,21 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const truncateText = (text, maxLength = 2000) => {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '... [truncated]';
+const truncateText = (text, maxLength = 1500) => {
+  if (!text) return '';
+  return text.length <= maxLength ? text : text.slice(0, maxLength) + '... [truncated]';
+};
+
+// Optional post-processing to scale / cap scores for realism
+const adjustScores = (scores) => {
+  const cappedScores = {
+    skillsMatch: Math.min(scores.skillsMatch, 85),
+    experienceMatch: Math.min(scores.experienceMatch, 85),
+    educationMatch: Math.min(scores.educationMatch, 85),
+  };
+  cappedScores.overall = Math.round(
+    (cappedScores.skillsMatch + cappedScores.experienceMatch + cappedScores.educationMatch) / 3
+  );
+  return cappedScores;
 };
 
 export const analyzeWithGemini = async (resumeText, jobDescription) => {
@@ -12,27 +25,23 @@ export const analyzeWithGemini = async (resumeText, jobDescription) => {
   const truncatedResumeText = truncateText(resumeText);
   const truncatedJobDescription = truncateText(jobDescription);
 
-const prompt = `
+  const prompt = `
 You are an expert in ATS resume analysis. Compare the given resume and job description.
 
 ### Scoring Rules
-- Each category (skills, experience, education) must be scored **0–100**. 
-- Use this scale:
-  - 90–100: Very strong alignment (resume almost perfectly fits the job description).
-  - 70–89: Good alignment (most requirements met, but some gaps).
-  - 50–69: Moderate alignment (many gaps, but some relevance).
-  - 20–49: Weak alignment (few overlaps).
-  - 0–19: Very poor alignment (almost no relevance).
-- Do not give fixed or generic values. Base each score strictly on the actual overlap.
+- Each category (skills, experience, education) must be scored 0–100.
+- Score **conservatively**: mid-level resumes should typically get 40–70 overall.
+- Only assign 90+ for very strong matches.
+- Base each score strictly on actual overlap; do not inflate.
 
 ### Output Required
 1. Scores for:
    - Skills Match
    - Experience Match
    - Education Match
-   - Overall (average of the three above, rounded).
-2. Strengths (bullet points) for each category.
-3. Weaknesses (bullet points) for each category.
+   - Overall (average of the three above, rounded)
+2. Strengths (bullet points) for each category
+3. Weaknesses (bullet points) for each category
 
 **Job Description:**
 ${truncatedJobDescription}
@@ -63,19 +72,37 @@ ${truncatedResumeText}
 }
 `;
 
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        maxOutputTokens: 3000,
+        temperature: 0.5, // slightly flexible for realistic scoring
+        responseMimeType: "application/json"
+      },
+    });
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      maxOutputTokens: 1000,
-      temperature: 0.7,
-    },
-  });
+    const jsonString = result.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!jsonString) {
+      console.error("Gemini returned no JSON:", JSON.stringify(result, null, 2));
+      throw new Error('Empty response from Gemini');
+    }
 
-  const jsonString = result.response.text().replace(/```json\n|\n```/g, '').trim();
-  if (!jsonString) throw new Error('Empty response from Gemini');
-  return JSON.parse(jsonString);
+    const parsed = JSON.parse(jsonString);
+
+    // Adjust scores to prevent inflated numbers for mid resumes
+    parsed.scores = adjustScores(parsed.scores);
+
+    console.log("🔎 Raw Gemini output:", jsonString);
+    console.log("✅ Adjusted Analysis Result:", parsed);
+
+    return parsed;
+
+  } catch (err) {
+    console.error('Gemini analysis error:', err);
+    throw new Error(`Analysis failed: ${err.message}`);
+  }
 };

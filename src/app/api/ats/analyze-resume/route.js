@@ -4,7 +4,7 @@ import jobStore from '@/lib/jobStore'
 import { connectDB } from '@/dbConfig/dbConfig'
 import Analysis from '@/models/Analysis'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from "@/lib/auth"
 
 export async function POST(req) {
   const body = await req.json()

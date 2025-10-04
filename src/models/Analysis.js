@@ -7,7 +7,7 @@ const AnalysisSchema = new mongoose.Schema({
     scores: { overall: { type: Number, default: 0 } },
     missingSkills: { type: [String], default: [] },
   },
-  createdAt: { type: Date, default: Date.now, expires: '7d' },
+  createdAt: { type: Date, default: Date.now, expires: '30d' },
 });
 
 
