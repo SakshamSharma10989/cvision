@@ -29,8 +29,8 @@ export const analyzeWithGemini = async (resumeText, jobDescription) => {
 You are an expert in ATS resume analysis. Compare the given resume and job description.
 
 ### Scoring Rules
-- Each category (skills, experience, education) must be scored 0–100.
-- Score **conservatively**: mid-level resumes should typically get 40–70 overall.
+- Each category (skills, experience, education) must be scored 0-100.
+- Score **conservatively**: mid-level resumes should typically get 40-70 overall.
 - Only assign 90+ for very strong matches.
 - Base each score strictly on actual overlap; do not inflate.
 
@@ -74,7 +74,7 @@ ${truncatedResumeText}
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
