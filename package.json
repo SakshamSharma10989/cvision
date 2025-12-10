@@ -26,7 +26,7 @@
     "jsonwebtoken": "^9.0.2",
     "mammoth": "^1.9.1",
     "mongoose": "^8.16.1",
-    "next": "15.3.4",
+    "next": "^16.0.8",
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
     "pdf-parse": "^1.1.1",
