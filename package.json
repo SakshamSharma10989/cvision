@@ -20,6 +20,7 @@
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "formidable": "^3.5.4",
+    "groq-sdk": "^0.37.0",
     "jose": "^6.1.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",

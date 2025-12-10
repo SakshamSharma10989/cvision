@@ -1,55 +1,50 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from "groq-sdk";
 
-const truncateText = (text, maxLength = 1500) => {
-  if (!text) return '';
-  return text.length <= maxLength ? text : text.slice(0, maxLength) + '... [truncated]';
-};
+const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Optional post-processing to scale / cap scores for realism
+const truncateText = (text, maxLength = 1800) =>
+  text && text.length > maxLength ? text.slice(0, maxLength) + "... [truncated]" : text;
+
 const adjustScores = (scores) => {
-  const cappedScores = {
+  const capped = {
     skillsMatch: Math.min(scores.skillsMatch, 85),
     experienceMatch: Math.min(scores.experienceMatch, 85),
     educationMatch: Math.min(scores.educationMatch, 85),
   };
-  cappedScores.overall = Math.round(
-    (cappedScores.skillsMatch + cappedScores.experienceMatch + cappedScores.educationMatch) / 3
+  capped.overall = Math.round(
+    (capped.skillsMatch + capped.experienceMatch + capped.educationMatch) / 3
   );
-  return cappedScores;
+  return capped;
 };
 
-export const analyzeWithGemini = async (resumeText, jobDescription) => {
-  const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) throw new Error('Google API key not configured');
+const safeParseJson = (raw) => {
+  if (!raw || typeof raw !== "string") throw new Error("Empty response from model");
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Model output was not JSON: " + raw.slice(0, 200));
+    return JSON.parse(match[0]);
+  }
+};
 
-  const truncatedResumeText = truncateText(resumeText);
-  const truncatedJobDescription = truncateText(jobDescription);
+export const analyzeATS = async (resumeText, jobDescription) => {
+  if (!process.env.GROQ_API_KEY) throw new Error("Missing GROQ_API_KEY");
 
   const prompt = `
-You are an expert in ATS resume analysis. Compare the given resume and job description.
+You are an ATS evaluator. Compare resume and job description.
 
-### Scoring Rules
-- Each category (skills, experience, education) must be scored 0-100.
-- Score **conservatively**: mid-level resumes should typically get 40-70 overall.
-- Only assign 90+ for very strong matches.
-- Base each score strictly on actual overlap; do not inflate.
+RULES:
+- Score Skills Match, Experience Match, Education Match from 0 to 100.
+- Score conservatively: typical resumes are 45–70 unless very aligned.
+- Strengths: ONLY skills/experience/education actually visible in the resume.
+- Weaknesses: ONLY skills/experience/education explicitly required in the job description but clearly missing from the resume.
+- Never list the same thing in both strengths and weaknesses.
+- Do NOT hallucinate weaknesses that are not in the job description.
+- If unsure, do NOT include it.
 
-### Output Required
-1. Scores for:
-   - Skills Match
-   - Experience Match
-   - Education Match
-   - Overall (average of the three above, rounded)
-2. Strengths (bullet points) for each category
-3. Weaknesses (bullet points) for each category
+Return STRICT JSON in this format:
 
-**Job Description:**
-${truncatedJobDescription}
-
-**Resume:**
-${truncatedResumeText}
-
-### Response Format (JSON only, no extra text):
 {
   "scores": {
     "skillsMatch": number,
@@ -70,39 +65,25 @@ ${truncatedResumeText}
     "overall": string[]
   }
 }
+
+JOB DESCRIPTION:
+${truncateText(jobDescription)}
+
+RESUME:
+${truncateText(resumeText)}
 `;
 
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const completion = await client.chat.completions.create({
+    model: "llama-3.1-8b-instant", // ✅ current, supported Groq model
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.2,
+    max_tokens: 2000,
+  });
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        maxOutputTokens: 3000,
-        temperature: 0.5, // slightly flexible for realistic scoring
-        responseMimeType: "application/json"
-      },
-    });
+  const raw = completion.choices?.[0]?.message?.content || "";
+  const parsed = safeParseJson(raw);
+  parsed.scores = adjustScores(parsed.scores);
+  parsed.usedModel = "Groq Llama 3.1 8B Instant";
 
-    const jsonString = result.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!jsonString) {
-      console.error("Gemini returned no JSON:", JSON.stringify(result, null, 2));
-      throw new Error('Empty response from Gemini');
-    }
-
-    const parsed = JSON.parse(jsonString);
-
-    // Adjust scores to prevent inflated numbers for mid resumes
-    parsed.scores = adjustScores(parsed.scores);
-
-    console.log("🔎 Raw Gemini output:", jsonString);
-    console.log("✅ Adjusted Analysis Result:", parsed);
-
-    return parsed;
-
-  } catch (err) {
-    console.error('Gemini analysis error:', err);
-    throw new Error(`Analysis failed: ${err.message}`);
-  }
+  return parsed;
 };
