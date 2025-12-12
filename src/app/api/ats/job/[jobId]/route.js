@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import jobStore from '@/lib/jobStore';
 
-export async function GET(_, contextPromise) {
-  const { params } = await contextPromise;
-  const jobId = params.jobId;
+export async function GET(request, context) {
+  const { jobId } = context.params;
 
   if (!jobStore.has(jobId)) {
-    return NextResponse.json({ error: 'Job ID not found' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'Job ID not found' },
+      { status: 404 }
+    );
   }
 
   const result = jobStore.get(jobId);
