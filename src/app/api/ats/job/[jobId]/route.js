@@ -1,16 +1,21 @@
-import { NextResponse } from 'next/server';
-import jobStore from '@/lib/jobStore';
+import { NextResponse } from "next/server";
+import { connectDB } from "@/dbConfig/dbConfig";
+import Analysis from "@/models/Analysis";
 
-export async function GET(request, context) {
-  const { jobId } = context.params;
+export async function GET(req, context) {
+  // 🔥 THIS IS THE FIX
+  const { jobId } = await context.params;
 
-  if (!jobStore.has(jobId)) {
+  await connectDB();
+
+  const analysis = await Analysis.findOne({ cacheKey: jobId }).lean();
+
+  if (!analysis) {
     return NextResponse.json(
-      { error: 'Job ID not found' },
-      { status: 404 }
+      { status: "pending" },
+      { status: 202 }
     );
   }
 
-  const result = jobStore.get(jobId);
-  return NextResponse.json(result);
+  return NextResponse.json(analysis.result);
 }
