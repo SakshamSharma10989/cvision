@@ -133,8 +133,8 @@ function ATSChecker({ resumeData }) {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-slate-900/60 text-slate-100 rounded-2xl shadow-lg border border-slate-700">
-      <h3 className="text-xl font-semibold text-indigo-400 flex items-center gap-2 mb-4">
+    <div className="w-full max-w-md mx-auto p-4 sm:p-6 bg-slate-900/60 text-slate-100 rounded-2xl shadow-lg border border-slate-700">
+      <h3 className="text-lg sm:text-xl font-semibold text-indigo-400 flex items-center gap-2 mb-4">
         <span>🔍</span> ATS Analysis
       </h3>
 
@@ -195,7 +195,7 @@ function ATSChecker({ resumeData }) {
       {result && !showLoader && (
         <div className="mt-6">
           {/* Tabs */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-4">
             {['summary', 'details'].map((tab) => (
               <button
                 key={tab}
@@ -215,7 +215,7 @@ function ATSChecker({ resumeData }) {
           {activeTab === 'summary' ? (
             <div className="text-center">
               <h4 className="text-lg font-semibold text-slate-200 mb-4">Resume Score</h4>
-              <div className="relative w-[180px] h-[180px] mx-auto">
+              <div className="relative w-36 h-36 sm:w-[180px] sm:h-[180px] mx-auto">
                 <svg viewBox="0 0 120 120" className="w-full h-full">
                   <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" strokeWidth="10" />
                   <circle
@@ -249,7 +249,7 @@ function ATSChecker({ resumeData }) {
                 </svg>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {['Skills Match', 'Experience Match', 'Education Match'].map((category) => (
                   <div key={category} className="p-4 bg-slate-800 rounded-lg text-center border border-slate-700">
                     <p className="text-xs text-slate-400 uppercase">{category}</p>
@@ -275,7 +275,7 @@ function ATSChecker({ resumeData }) {
                   <div key={category} className="mb-3">
                     <button
                       onClick={() => toggleSection(category)}
-                      className="w-full text-left flex items-center justify-between p-2 bg-slate-700 rounded-lg hover:bg-slate-600"
+                      className="w-full text-left flex items-center justify-between gap-3 p-2 bg-slate-700 rounded-lg hover:bg-slate-600"
                     >
                       <span className="text-sm font-medium">{category}</span>
                       <div className="flex items-center space-x-2">

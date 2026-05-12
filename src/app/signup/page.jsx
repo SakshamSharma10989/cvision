@@ -39,13 +39,13 @@ const Signup = () => {
   }
 
   return (
-    <div className="w-full flex justify-center bg-slate-900/70 px-3 py-6 ">
-      <div className="w-full max-w-sm rounded-lg bg-slate-900/60 backdrop-blur-md shadow-md px-4 pb-5 border border-slate-800">
+    <div className="min-h-[calc(100vh-64px)] w-full flex justify-center bg-slate-900/70 px-3 py-6">
+      <div className="w-full max-w-sm self-start sm:self-center rounded-lg bg-slate-900/60 backdrop-blur-md shadow-md px-4 pb-5 border border-slate-800">
         <form onSubmit={signupUser} className="space-y-3">
           <h1 className="text-2xl font-bold text-white text-center pt-2">Sign Up</h1>
 
           {/* Name + Username */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="flex flex-col space-y-1.5">
               <label className="text-xs text-slate-300">Name</label>
               <input

@@ -35,14 +35,14 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-[calc(100vh-64px)] w-full text-slate-100 px-6 py-10">
+      <main className="min-h-[calc(100vh-64px)] w-full text-slate-100 px-4 sm:px-6 py-6 sm:py-10">
         <div className="max-w-4xl mx-auto text-base text-slate-300">Loading…</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-[calc(100vh-64px)] w-full text-slate-100 px-6 py-10 bg-[#0f172ab3]">
+    <main className="min-h-[calc(100vh-64px)] w-full text-slate-100 px-4 sm:px-6 py-6 sm:py-10 bg-[#0f172ab3]">
       {/* Background subtle glow */}
       <div
         className="pointer-events-none absolute inset-0 opacity-10
@@ -52,7 +52,7 @@ export default function ProfilePage() {
       />
 
       <div className="relative mx-auto max-w-4xl space-y-8">
-        <h1 className="text-3xl font-bold">Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Profile</h1>
 
         {err && (
           <div className="text-base text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
@@ -86,10 +86,10 @@ export default function ProfilePage() {
               >
                 {/* Resume Header */}
                 <div className="p-6 border-b border-slate-700">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h2 className="text-xl font-semibold mb-1 flex items-center gap-2">
-                        📄 <span className="truncate max-w-[26rem]">{resume.filename}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="min-w-0">
+                      <h2 className="text-lg sm:text-xl font-semibold mb-1 flex items-center gap-2">
+                        📄 <span className="truncate max-w-full sm:max-w-[26rem]">{resume.filename}</span>
                       </h2>
                       <p className="text-base text-slate-300">
                         Uploaded:{' '}
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                   {resume.analyses?.length === 0 ? (
                     <p className="text-base text-slate-400">No analysis yet.</p>
                   ) : (
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {resume.analyses.map((a) => {
                         const overall =
                           typeof a.overall === 'number' ? Math.round(a.overall) : null
@@ -134,9 +134,9 @@ export default function ProfilePage() {
                             className="rounded-2xl bg-slate-900/60 border border-slate-700 p-5 hover:border-indigo-500/40 transition"
                           >
                             {/* Header: date + big score */}
-                            <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start justify-between gap-3 mb-4">
                               <div className="text-base text-slate-400">{when}</div>
-                              <div className="text-3xl font-extrabold tracking-tight text-indigo-400">
+                              <div className="shrink-0 text-2xl sm:text-3xl font-extrabold tracking-tight text-indigo-400">
                                 {overall !== null ? `${overall}%` : 'N/A'}
                               </div>
                             </div>

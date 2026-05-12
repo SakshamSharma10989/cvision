@@ -28,8 +28,8 @@ const Login = () => {
   }
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-slate-900/70 px-4 pb-15">
-      <div className="w-full max-w-xs rounded-xl bg-slate-900/60 backdrop-blur-md shadow-lg p-6 border border-slate-800">
+    <div className="min-h-[calc(100vh-64px)] w-full flex items-center justify-center bg-slate-900/70 px-4 py-6">
+      <div className="w-full max-w-sm rounded-xl bg-slate-900/60 backdrop-blur-md shadow-lg p-5 sm:p-6 border border-slate-800">
         <form onSubmit={handleLoginSubmit} className="space-y-5">
           <h1 className="text-2xl font-bold text-white text-center">Login</h1>
 

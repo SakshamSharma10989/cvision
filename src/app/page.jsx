@@ -36,16 +36,16 @@ export default function Home() {
   // ✅ If authenticated
   return (
     <AppProvider>
-      <div className="w-full h-[calc(100vh-64px)] flex flex-col md:flex-row">
+      <div className="w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] flex flex-col lg:flex-row">
         {/* Left panel */}
-        <div className="w-full md:w-1/2 md:h-full overflow-y-auto 
+        <div className="w-full lg:w-1/2 lg:h-full overflow-y-auto 
                         p-4 sm:p-6 bg-slate-900/70 
-                        border-b md:border-b-0 md:border-r border-slate-800">
+                        border-b lg:border-b-0 lg:border-r border-slate-800">
           <Body />
         </div>
 
         {/* Right panel */}
-        <div className="w-full md:w-1/2 md:h-full overflow-y-auto 
+        <div className="w-full lg:w-1/2 lg:h-full overflow-y-auto 
                         p-4 sm:p-6 bg-slate-900/70">
           <JobList />
         </div>

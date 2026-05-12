@@ -83,7 +83,7 @@ const Body = () => {
   }
 
   return (
-    <div className="w-full rounded-xl bg-slate-900/60 backdrop-blur-md shadow-lg p-6 sm:p-8 border border-slate-800">
+    <div className="w-full rounded-xl bg-slate-900/60 backdrop-blur-md shadow-lg p-4 sm:p-6 lg:p-8 border border-slate-800">
       {!resumeData && (
         <>
           <input
@@ -95,7 +95,7 @@ const Body = () => {
           />
 
           <div
-            className={`border-2 border-dashed rounded-lg p-6 cursor-pointer transition-all duration-300
+            className={`border-2 border-dashed rounded-lg p-4 sm:p-6 cursor-pointer transition-all duration-300
               ${
                 isDragging
                   ? 'border-indigo-400 ring-1 ring-indigo-400/30 bg-slate-800/60'
@@ -109,7 +109,7 @@ const Body = () => {
             <div className="flex flex-col items-center gap-3">
               <svg
                 viewBox="0 0 24 24"
-                className="w-16 h-16 text-indigo-400"
+                className="w-12 h-12 sm:w-16 sm:h-16 text-indigo-400"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.25"
@@ -121,7 +121,7 @@ const Body = () => {
                 />
                 <path d="M12 22V10m0 0l-3 3m3-3l3 3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="text-slate-200 text-lg font-medium">
+              <span className="text-center break-words text-slate-200 text-base sm:text-lg font-medium">
                 {isDragging
                   ? 'Release to Upload Your Resume'
                   : selectedFile

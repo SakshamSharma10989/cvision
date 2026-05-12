@@ -7,7 +7,7 @@ function ResumePreview({ resumeData }) {
     <iframe
       src={`/api/preview?url=${encodeURIComponent(resumeData.fileUrl)}#toolbar=0&navpanes=0&scrollbar=0`}
       title="Resume Preview"
-      className="w-full h-[90vh] border-none"
+      className="w-full h-[70vh] lg:h-[90vh] border-none"
       style={{ minHeight: '100%' }}
     />
   ) : resumeData.text ? (

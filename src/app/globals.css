@@ -114,18 +114,24 @@ div {
   scrollbar-width: none;     /* Firefox */
 }
 html {
-  font-size: 18px; /* bump base size (default Tailwind is 16px) */
+  font-size: 16px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  @apply text-lg leading-relaxed; 
+  @apply text-base leading-relaxed;
 }
 @layer base {
   html, body {
-    font-size: 22px !important;
+    font-size: 16px;
+  }
+
+  @media (min-width: 768px) {
+    html, body {
+      font-size: 18px;
+    }
   }
 }
 
